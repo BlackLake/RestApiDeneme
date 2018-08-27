@@ -1,292 +1,179 @@
 package com.parrotize.restapideneme;
 
-import android.os.AsyncTask;
+import android.app.ProgressDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.JsonReader;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.Toast;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
-import javax.net.ssl.HttpsURLConnection;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class PostsActivity extends AppCompatActivity {
 
 
     PostsAdapter postsAdapter;
+    RecyclerView recyclerView;
+    ProgressDialog progressDoalog;
+
     EditText editTextId;
     EditText editTextTitle;
     EditText editTextBody;
-    List<Post> posts;
-    ListView listView;
-    Post post;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_posts);
 
+        getAllPosts();
     }
 
     public void onClickCreatePost(View view)
     {
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                // All your networking logic
-                // should be here
+        editTextTitle = findViewById(R.id.editText_title);
+        String title = editTextTitle.getText().toString();
+        editTextBody = findViewById(R.id.editText_body);
+        String body = editTextBody.getText().toString();
 
-                if (posts==null)
-                {
-                    posts= new ArrayList<>();
-                }
+        Post post = new Post(100,200,title,body);
 
-                editTextTitle= (EditText) findViewById(R.id.editText_title);
-                editTextBody= (EditText) findViewById(R.id.editText_body);
-
-                URL apiEndPoint = null;
-                HttpsURLConnection myConnection = null;
-                try {
-                    // Create URL
-                    apiEndPoint = new URL("https://jsonplaceholder.typicode.com/posts/");
-
-                    // Create connection
-                    myConnection = (HttpsURLConnection) apiEndPoint.openConnection();
-                    myConnection.setRequestMethod("POST");
-
-                    JSONObject jsonObject= new JSONObject();
-                    jsonObject.put("title", editTextTitle.getText());
-                    jsonObject.put("body", editTextBody.getText());
-                    jsonObject.put("userId",1);
-
-                    // Create the data
-                    String myData = jsonObject.toString();
-                    //String myData = "{\"userId\": 100,\"id\": 100,\"title\": \"main title\",\"body\": \"main body\"}";
-
-                    // Enable writing
-                    myConnection.setDoOutput(true);
-
-                    // Write the data
-                    myConnection.getOutputStream().write(myData.getBytes());
-
-                    if (myConnection.getResponseCode() == 201) {
-                        // Success
-                        // Further processing here
-                        InputStream responseBody = myConnection.getInputStream();
-
-                        JsonReader jsonReader = new JsonReader(new InputStreamReader(responseBody, "UTF-8"));
-
-                        post = readPost(jsonReader);
-                        //post = (Post) readPostsArray(jsonReader).get(0);
-
-                        posts.add(post);
-
-                    } else {
-                        // Error handling code goes here
-                    }
-                    myConnection.disconnect();
-
-
-
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-
-            }
-        });
-
-
-        if (posts != null)
-        {
-            listView = (ListView) findViewById(R.id.listViewPosts);
-            postsAdapter=new PostsAdapter(this,posts);
-            listView.setAdapter(postsAdapter);
-        }
-
+        createNewPost(post);
     }
 
+    public void onClickGetByUserId(View view)
+    {
+        editTextId = findViewById(R.id.editText_id);
+        String id = editTextId.getText().toString();
+        Toast.makeText(PostsActivity.this, id, Toast.LENGTH_SHORT).show();
 
-    public void onClickGetByUserId(View view) throws ExecutionException, InterruptedException {
-        editTextId = (EditText) findViewById(R.id.editText_id);
-        Toast.makeText(PostsActivity.this, editTextId.getText(), Toast.LENGTH_SHORT).show();
+        getPostsByUserId(Integer.parseInt(id));
 
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                // All your networking logic
-                // should be here
-
-                editTextId = (EditText) findViewById(R.id.editText_id);
-
-                URL apiEndPoint = null;
-                HttpsURLConnection myConnection = null;
-                try {
-                    // Create URL
-                    apiEndPoint = new URL("https://jsonplaceholder.typicode.com/posts?userId="+editTextId.getText());
-
-                    // Create connection
-                    myConnection = (HttpsURLConnection) apiEndPoint.openConnection();
-
-                    if (myConnection.getResponseCode() == 200) {
-                        // Success
-                        // Further processing here
-                        InputStream responseBody = myConnection.getInputStream();
-
-                        posts = readJsonStream(responseBody);
-
-
-                    } else {
-                        // Error handling code goes here
-                    }
-                    myConnection.disconnect();
-
-
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-
-            }
-        });
-
-        if (posts != null)
-        {
-            listView = (ListView) findViewById(R.id.listViewPosts);
-            postsAdapter=new PostsAdapter(this,posts);
-            listView.setAdapter(postsAdapter);
-        }
     }
     public void onClickGetByPostId(View view)
     {
-        editTextId = (EditText) findViewById(R.id.editText_id);
-        Toast.makeText(PostsActivity.this, editTextId.getText(), Toast.LENGTH_SHORT).show();
+        editTextId = findViewById(R.id.editText_id);
+        String id = editTextId.getText().toString();
+        Toast.makeText(PostsActivity.this, id, Toast.LENGTH_SHORT).show();
+
+        getPostsById(Integer.parseInt(id));
+    }
+
+    private void createNewPost(final Post post)
+    {
+        progressDoalog = new ProgressDialog(PostsActivity.this);
+        progressDoalog.setMessage("Loading....");
+        progressDoalog.show();
 
 
-        AsyncTask.execute(new Runnable() {
+        /*Create handle for the RetrofitInstance interface*/
+        GetDataService service = RetrofitClientInstance.getRetrofitInstance().create(GetDataService.class);
+        Call<Post> call = service.postNewPost(post);
+        call.enqueue(new Callback<Post>() {
             @Override
-            public void run() {
-                // All your networking logic
-                // should be here
+            public void onResponse(Call<Post> call, Response<Post> response) {
+                progressDoalog.dismiss();
+                List<Post> posts = new ArrayList<>();
+                posts.add(response.body());
+                generateDataList(posts);
+            }
 
-                editTextId = (EditText) findViewById(R.id.editText_id);
-
-                URL apiEndPoint = null;
-                HttpsURLConnection myConnection = null;
-                try {
-                    // Create URL
-                    apiEndPoint = new URL("https://jsonplaceholder.typicode.com/posts?id="+editTextId.getText());
-
-                    // Create connection
-                    myConnection = (HttpsURLConnection) apiEndPoint.openConnection();
-
-                    if (myConnection.getResponseCode() == 200) {
-                        // Success
-                        // Further processing here
-                        InputStream responseBody = myConnection.getInputStream();
-
-                        posts = readJsonStream(responseBody);
-
-
-                    } else {
-                        // Error handling code goes here
-                    }
-                    myConnection.disconnect();
-
-
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-
+            @Override
+            public void onFailure(Call<Post> call, Throwable t) {
+                progressDoalog.dismiss();
+                Toast.makeText(PostsActivity.this, "Something went wrong...Please try later!", Toast.LENGTH_SHORT).show();
             }
         });
-
-        if (posts != null)
-        {
-            listView = (ListView) findViewById(R.id.listViewPosts);
-            postsAdapter=new PostsAdapter(this,posts);
-            listView.setAdapter(postsAdapter);
-        }
     }
 
-    public List readJsonStream(InputStream in) throws IOException {
-        JsonReader jsonReader = new JsonReader(new InputStreamReader(in, "UTF-8"));
-        try {
-            return readPostsArray(jsonReader);
-        }
-        finally {
-            jsonReader.close();
-        }
-    }
+    private void getAllPosts()
+    {
+        progressDoalog = new ProgressDialog(PostsActivity.this);
+        progressDoalog.setMessage("Loading....");
+        progressDoalog.show();
 
 
-    public List readPostsArray(JsonReader jsonReader) throws IOException {
-        List<Post> posts = new ArrayList();
-
-        jsonReader.beginArray();
-        while (jsonReader.hasNext()) {
-            posts.add(readPost(jsonReader));
-        }
-        jsonReader.endArray();
-        return posts;
-    }
-
-    public Post readPost(JsonReader jsonReader) throws IOException {
-
-        int userId = -1;
-        int id= -1;
-        String title = null;
-        String body = null;
-
-        jsonReader.beginObject();
-        while (jsonReader.hasNext())
-        {
-            String name = jsonReader.nextName();
-            if (name.equals("userId"))
-            {
-                userId = jsonReader.nextInt();
-            } else if (name.equals("id"))
-            {                id = jsonReader.nextInt();
-
-            } else if (name.equals("title"))
-            {
-                title = jsonReader.nextString();
-
-            } else if (name.equals("body"))
-            {
-                body = jsonReader.nextString();
-            } else {
-                jsonReader.skipValue();
+        /*Create handle for the RetrofitInstance interface*/
+        GetDataService service = RetrofitClientInstance.getRetrofitInstance().create(GetDataService.class);
+        Call<List<Post>> call = service.getAllPosts();
+        call.enqueue(new Callback<List<Post>>() {
+            @Override
+            public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
+                progressDoalog.dismiss();
+                generateDataList(response.body());
             }
-        }
-        jsonReader.endObject();
 
-        Post post = new Post(userId,id,title,body);
-        return post;
+            @Override
+            public void onFailure(Call<List<Post>> call, Throwable t) {
+                progressDoalog.dismiss();
+                Toast.makeText(PostsActivity.this, "Something went wrong...Please try later!", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
+    private void getPostsById(Integer id)
+    {
+        progressDoalog = new ProgressDialog(PostsActivity.this);
+        progressDoalog.setMessage("Loading....");
+        progressDoalog.show();
+
+
+        /*Create handle for the RetrofitInstance interface*/
+        GetDataService service = RetrofitClientInstance.getRetrofitInstance().create(GetDataService.class);
+        Call<List<Post>> call = service.getPostsById(id);
+        call.enqueue(new Callback<List<Post>>() {
+            @Override
+            public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
+                progressDoalog.dismiss();
+                generateDataList(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<List<Post>> call, Throwable t) {
+                progressDoalog.dismiss();
+                Toast.makeText(PostsActivity.this, "Something went wrong...Please try later!", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void getPostsByUserId(Integer id)
+    {
+        progressDoalog = new ProgressDialog(PostsActivity.this);
+        progressDoalog.setMessage("Loading....");
+        progressDoalog.show();
+
+
+        /*Create handle for the RetrofitInstance interface*/
+        GetDataService service = RetrofitClientInstance.getRetrofitInstance().create(GetDataService.class);
+        Call<List<Post>> call = service.getPostsByUserId(id);
+        call.enqueue(new Callback<List<Post>>() {
+            @Override
+            public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
+                progressDoalog.dismiss();
+                generateDataList(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<List<Post>> call, Throwable t) {
+                progressDoalog.dismiss();
+                Toast.makeText(PostsActivity.this, "Something went wrong...Please try later!", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    /*Method to generate List of data using RecyclerView with custom adapter*/
+    private void generateDataList(List<Post> posts) {
+        recyclerView = findViewById(R.id.recyclerViewPosts);
+        postsAdapter = new PostsAdapter(this,posts);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(PostsActivity.this);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(postsAdapter);
+    }
 
 }

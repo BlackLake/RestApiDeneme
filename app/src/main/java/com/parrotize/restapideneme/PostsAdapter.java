@@ -1,6 +1,7 @@
 package com.parrotize.restapideneme;
 
 import android.content.Context;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,60 +11,61 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PostsAdapter extends BaseAdapter{
+public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.CustomViewHolder>{
 
     private Context context; //context
     private List<Post> posts ;
-    private Post post;
 
     public PostsAdapter(Context context, List<Post> posts) {
         this.context = context;
         this.posts = posts;
     }
 
-    @Override
-    public int getCount() {
-        return posts.size();
+    class CustomViewHolder extends RecyclerView.ViewHolder {
+
+        public final View mView;
+
+        TextView textViewUserId;
+        TextView textViewId;
+        TextView textViewTitle;
+        TextView textViewBody;
+
+        CustomViewHolder(View itemView) {
+            super(itemView);
+            mView = itemView;
+
+            textViewUserId =  mView.findViewById(R.id.textView_user_Id);
+            textViewId =  mView.findViewById(R.id.textView_id);
+            textViewTitle = mView.findViewById(R.id.textView_title);
+            textViewBody =  mView.findViewById(R.id.textView_body);
+/*
+
+*/
+        }
     }
 
     @Override
-    public Object getItem(int position) {
-        return posts.get(position);
+    public PostsAdapter.CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+        LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
+        View view = layoutInflater.inflate(R.layout.list_item_post, parent, false);
+        return new CustomViewHolder(view);
+
     }
 
     @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View rowView;
-
-        post=posts.get(position);
-
-        rowView = LayoutInflater.from(context).inflate(R.layout.list_item_post, null);
-
-        // get the TextView for item name and item description
-        TextView textViewUserId = (TextView) rowView.findViewById(R.id.textView_user_Id);
-        TextView textViewId = (TextView) rowView.findViewById(R.id.textView_id);
-        TextView textViewTitle = (TextView) rowView.findViewById(R.id.textView_title);
-        TextView textViewBody = (TextView) rowView.findViewById(R.id.textView_body);
+    public void onBindViewHolder(PostsAdapter.CustomViewHolder holder, int position) {
 
         //sets the text for item name and item description from the current item object
-        textViewUserId.setText("User id : "+Integer.toString(post.getUserId()));
-        textViewId.setText("Post id : "+Integer.toString(post.getId()));
-        textViewTitle.setText(post.getTitle());
-        textViewBody.setText(post.getBody());
+        holder.textViewUserId.setText("User id : "+Integer.toString(posts.get(position).getUserId()));
+        holder.textViewId.setText("Post id : "+Integer.toString(posts.get(position).getId()));
+        holder.textViewTitle.setText(posts.get(position).getTitle());
+        holder.textViewBody.setText(posts.get(position).getBody());
 
-        // returns the view for the current row
-        return rowView;
     }
 
-    public void refresh(List<Post> posts) {
-        this.posts.clear();
-        this.posts.addAll(posts);
-        notifyDataSetChanged();
+    @Override
+    public int getItemCount() {
+        return posts.size();
     }
-
 }
