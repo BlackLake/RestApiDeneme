@@ -18,6 +18,9 @@ import com.parrotize.restapideneme.adapter.UserAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -25,29 +28,27 @@ import retrofit2.Response;
 public class UsersActivity extends AppCompatActivity {
 
     UserAdapter userAdapter;
-    RecyclerView recyclerView;
+    @BindView(R.id.recyclerViewUsers) RecyclerView recyclerViewUsers;
     ProgressDialog progressDoalog;
 
-    EditText editTextUserName;
-    EditText editTextName;
-    EditText editTextEmail;
+    @BindView(R.id.editTextUserName) EditText editTextUserName;
+    @BindView(R.id.editTextName) EditText editTextName;
+    @BindView(R.id.editTextEmail) EditText editTextEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_users);
+        ButterKnife.bind(this);
 
         getAllUsers();
     }
 
+    @OnClick(R.id.buttonCreateUser)
     public void onClickCreateNewUser(View view)
     {
-
-        editTextUserName = findViewById(R.id.editTextUserName);
         String userName = editTextUserName.getText().toString();
-        editTextName = findViewById(R.id.editTextName);
         String name = editTextName.getText().toString();
-        editTextEmail = findViewById(R.id.editTextEmail);
         String email = editTextEmail.getText().toString();
 
         User user = new User(100, name,userName,email);
@@ -60,7 +61,6 @@ public class UsersActivity extends AppCompatActivity {
         progressDoalog = new ProgressDialog(UsersActivity.this);
         progressDoalog.setMessage("Loading....");
         progressDoalog.show();
-
 
         /*Create handle for the RetrofitInstance interface*/
         GetDataService service = RetrofitClientInstance.getRetrofitInstance().create(GetDataService.class);
@@ -135,11 +135,10 @@ public class UsersActivity extends AppCompatActivity {
 
     /*Method to generate List of data using RecyclerView with custom adapter*/
     private void generateDataList(List<User> users) {
-        recyclerView = findViewById(R.id.recyclerViewUsers);
         userAdapter = new UserAdapter(this,users);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(UsersActivity.this);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(userAdapter);
+        recyclerViewUsers.setLayoutManager(layoutManager);
+        recyclerViewUsers.setAdapter(userAdapter);
     }
 
 }

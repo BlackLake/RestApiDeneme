@@ -18,6 +18,9 @@ import com.parrotize.restapideneme.adapter.PostsAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -26,26 +29,26 @@ public class PostsActivity extends AppCompatActivity {
 
 
     PostsAdapter postsAdapter;
-    RecyclerView recyclerView;
-    ProgressDialog progressDoalog;
+    @BindView(R.id.recyclerViewPosts) RecyclerView recyclerViewPosts;
+    ProgressDialog progressDialog;
 
-    EditText editTextId;
-    EditText editTextTitle;
-    EditText editTextBody;
+    @BindView(R.id.editText_id) EditText editTextId;
+    @BindView(R.id.editText_title) EditText editTextTitle;
+    @BindView(R.id.editText_body) EditText editTextBody;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_posts);
+        ButterKnife.bind(this);
 
         getAllPosts();
     }
 
+    @OnClick(R.id.buttonCreatePost)
     public void onClickCreatePost(View view)
     {
-        editTextTitle = findViewById(R.id.editText_title);
         String title = editTextTitle.getText().toString();
-        editTextBody = findViewById(R.id.editText_body);
         String body = editTextBody.getText().toString();
 
         Post post = new Post(100,200,title,body);
@@ -53,18 +56,19 @@ public class PostsActivity extends AppCompatActivity {
         createNewPost(post);
     }
 
+    @OnClick(R.id.buttonGetPostByUserId)
     public void onClickGetByUserId(View view)
     {
-        editTextId = findViewById(R.id.editText_id);
         String id = editTextId.getText().toString();
         Toast.makeText(PostsActivity.this, id, Toast.LENGTH_SHORT).show();
 
         getPostsByUserId(Integer.parseInt(id));
 
     }
-    public void onClickGetByPostId(View view)
+
+    @OnClick(R.id.buttonGetPostByPostId)
+    public void onClickGetPostByPostId(View view)
     {
-        editTextId = findViewById(R.id.editText_id);
         String id = editTextId.getText().toString();
         Toast.makeText(PostsActivity.this, id, Toast.LENGTH_SHORT).show();
 
@@ -73,9 +77,9 @@ public class PostsActivity extends AppCompatActivity {
 
     private void createNewPost(final Post post)
     {
-        progressDoalog = new ProgressDialog(PostsActivity.this);
-        progressDoalog.setMessage("Loading....");
-        progressDoalog.show();
+        progressDialog = new ProgressDialog(PostsActivity.this);
+        progressDialog.setMessage("Loading....");
+        progressDialog.show();
 
 
         /*Create handle for the RetrofitInstance interface*/
@@ -84,7 +88,7 @@ public class PostsActivity extends AppCompatActivity {
         call.enqueue(new Callback<Post>() {
             @Override
             public void onResponse(Call<Post> call, Response<Post> response) {
-                progressDoalog.dismiss();
+                progressDialog.dismiss();
                 List<Post> posts = new ArrayList<>();
                 posts.add(response.body());
                 generateDataList(posts);
@@ -92,7 +96,7 @@ public class PostsActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<Post> call, Throwable t) {
-                progressDoalog.dismiss();
+                progressDialog.dismiss();
                 Toast.makeText(PostsActivity.this, "Something went wrong...Please try later!", Toast.LENGTH_SHORT).show();
             }
         });
@@ -100,9 +104,9 @@ public class PostsActivity extends AppCompatActivity {
 
     private void getAllPosts()
     {
-        progressDoalog = new ProgressDialog(PostsActivity.this);
-        progressDoalog.setMessage("Loading....");
-        progressDoalog.show();
+        progressDialog = new ProgressDialog(PostsActivity.this);
+        progressDialog.setMessage("Loading....");
+        progressDialog.show();
 
 
         /*Create handle for the RetrofitInstance interface*/
@@ -111,13 +115,13 @@ public class PostsActivity extends AppCompatActivity {
         call.enqueue(new Callback<List<Post>>() {
             @Override
             public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
-                progressDoalog.dismiss();
+                progressDialog.dismiss();
                 generateDataList(response.body());
             }
 
             @Override
             public void onFailure(Call<List<Post>> call, Throwable t) {
-                progressDoalog.dismiss();
+                progressDialog.dismiss();
                 Toast.makeText(PostsActivity.this, "Something went wrong...Please try later!", Toast.LENGTH_SHORT).show();
             }
         });
@@ -125,9 +129,9 @@ public class PostsActivity extends AppCompatActivity {
 
     private void getPostsById(Integer id)
     {
-        progressDoalog = new ProgressDialog(PostsActivity.this);
-        progressDoalog.setMessage("Loading....");
-        progressDoalog.show();
+        progressDialog = new ProgressDialog(PostsActivity.this);
+        progressDialog.setMessage("Loading....");
+        progressDialog.show();
 
 
         /*Create handle for the RetrofitInstance interface*/
@@ -136,13 +140,13 @@ public class PostsActivity extends AppCompatActivity {
         call.enqueue(new Callback<List<Post>>() {
             @Override
             public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
-                progressDoalog.dismiss();
+                progressDialog.dismiss();
                 generateDataList(response.body());
             }
 
             @Override
             public void onFailure(Call<List<Post>> call, Throwable t) {
-                progressDoalog.dismiss();
+                progressDialog.dismiss();
                 Toast.makeText(PostsActivity.this, "Something went wrong...Please try later!", Toast.LENGTH_SHORT).show();
             }
         });
@@ -150,9 +154,9 @@ public class PostsActivity extends AppCompatActivity {
 
     private void getPostsByUserId(Integer id)
     {
-        progressDoalog = new ProgressDialog(PostsActivity.this);
-        progressDoalog.setMessage("Loading....");
-        progressDoalog.show();
+        progressDialog = new ProgressDialog(PostsActivity.this);
+        progressDialog.setMessage("Loading....");
+        progressDialog.show();
 
 
         /*Create handle for the RetrofitInstance interface*/
@@ -161,13 +165,13 @@ public class PostsActivity extends AppCompatActivity {
         call.enqueue(new Callback<List<Post>>() {
             @Override
             public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
-                progressDoalog.dismiss();
+                progressDialog.dismiss();
                 generateDataList(response.body());
             }
 
             @Override
             public void onFailure(Call<List<Post>> call, Throwable t) {
-                progressDoalog.dismiss();
+                progressDialog.dismiss();
                 Toast.makeText(PostsActivity.this, "Something went wrong...Please try later!", Toast.LENGTH_SHORT).show();
             }
         });
@@ -175,11 +179,10 @@ public class PostsActivity extends AppCompatActivity {
 
     /*Method to generate List of data using RecyclerView with custom adapter*/
     private void generateDataList(List<Post> posts) {
-        recyclerView = findViewById(R.id.recyclerViewPosts);
         postsAdapter = new PostsAdapter(this,posts);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(PostsActivity.this);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(postsAdapter);
+        recyclerViewPosts.setLayoutManager(layoutManager);
+        recyclerViewPosts.setAdapter(postsAdapter);
     }
 
 }
