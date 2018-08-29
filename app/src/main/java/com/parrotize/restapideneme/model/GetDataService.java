@@ -1,4 +1,4 @@
-package com.parrotize.restapideneme;
+package com.parrotize.restapideneme.model;
 
 import java.util.List;
 
@@ -31,8 +31,6 @@ public interface GetDataService {
 
     @POST("users")
     Call<User> postNewUser(@Body User user);
-
-
 
 
 }

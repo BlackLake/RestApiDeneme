@@ -1,9 +1,11 @@
-package com.parrotize.restapideneme;
+package com.parrotize.restapideneme.ui;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+
+import com.parrotize.restapideneme.R;
 
 public class MainActivity extends AppCompatActivity {
 

@@ -1,13 +1,15 @@
-package com.parrotize.restapideneme;
+package com.parrotize.restapideneme.ui;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-public class AlbumsActivity extends AppCompatActivity {
+import com.parrotize.restapideneme.R;
+
+public class PhotosActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_albums);
+        setContentView(R.layout.activity_photos);
     }
 }

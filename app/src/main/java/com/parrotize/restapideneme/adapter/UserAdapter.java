@@ -1,4 +1,4 @@
-package com.parrotize.restapideneme;
+package com.parrotize.restapideneme.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -6,6 +6,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.parrotize.restapideneme.R;
+import com.parrotize.restapideneme.model.User;
 
 import java.util.List;
 

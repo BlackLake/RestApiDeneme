@@ -1,4 +1,4 @@
-package com.parrotize.restapideneme;
+package com.parrotize.restapideneme.model;
 
 import com.google.gson.annotations.SerializedName;
 

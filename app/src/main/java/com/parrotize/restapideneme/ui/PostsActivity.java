@@ -1,4 +1,4 @@
-package com.parrotize.restapideneme;
+package com.parrotize.restapideneme.ui;
 
 import android.app.ProgressDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -8,6 +8,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.parrotize.restapideneme.model.GetDataService;
+import com.parrotize.restapideneme.model.Post;
+import com.parrotize.restapideneme.R;
+import com.parrotize.restapideneme.model.RetrofitClientInstance;
+import com.parrotize.restapideneme.adapter.PostsAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
